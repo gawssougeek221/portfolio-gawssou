@@ -323,17 +323,9 @@ a {
    SPLINE VIEWER - Hide watermark + Center
    ============================================ */
 
-/* Hide "Built with Spline" logo - Multiple approaches */
+/* Hide "Built with Spline" logo */
 spline-viewer {
   --logo-opacity: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-/* Center the canvas inside spline-viewer */
-spline-viewer canvas {
-  margin: 0 auto !important;
 }
 
 /* Shadow DOM parts */

@@ -117,7 +117,7 @@ function SplineViewerBackground() {
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 z-0 pointer-events-auto transition-all duration-500"
+      className="fixed inset-0 z-0 pointer-events-auto transition-all duration-500 overflow-hidden"
       style={{ 
         filter: `blur(${blurAmount}px)`,
         opacity: blurAmount > 0 ? 0.7 : 1,
@@ -130,30 +130,21 @@ function SplineViewerBackground() {
           backgroundColor: `rgba(0, 0, 0, ${blurAmount * 0.05})` 
         }}
       />
-      {/* @ts-ignore - Custom element not recognized by TypeScript */}
-      <spline-viewer 
-        url="https://prod.spline.design/m4QKQK7slm5uLuls/scene.splinecode"
-        className="w-full h-full"
-        style={{ 
-          width: '100%', 
-          height: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-        hide-logo="true"
-        events="all"
-      />
-      <style jsx global>{`
-        spline-viewer {
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-        }
-        spline-viewer canvas {
-          margin: 0 auto !important;
-        }
-      `}</style>
+      {/* Centering wrapper */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        {/* @ts-ignore - Custom element not recognized by TypeScript */}
+        <spline-viewer 
+          url="https://prod.spline.design/m4QKQK7slm5uLuls/scene.splinecode"
+          style={{ 
+            width: '100vw', 
+            height: '100vh',
+            maxWidth: '100%',
+            maxHeight: '100%',
+          }}
+          hide-logo="true"
+          events="all"
+        />
+      </div>
     </div>
   )
 }
