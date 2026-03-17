@@ -18,6 +18,7 @@ import {
 import { FocusRail, type FocusRailItem } from '@/components/ui/focus-rail'
 import { Carousel } from '@/components/ui/carousel'
 import { ElegantShapesBackground } from '@/components/ui/shape-landing-hero'
+import { AboutSection, TestimonialsSection } from '@/components/sections'
 
 // ============================================
 // SPLINE VIEWER - FIXED BACKGROUND WITH SCROLL EVENTS + BLUR ON SECTIONS
@@ -794,175 +795,6 @@ function ProjectsSection() {
 }
 
 // ============================================
-// SECTION ABOUT
-// ============================================
-function AboutSection() {
-  const containerRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start end', 'end start']
-  })
-  
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0])
-  
-  return (
-    <section id="about" ref={containerRef} className="relative py-24 md:py-40 bg-transparent">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute -bottom-20 -left-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"
-          animate={{
-            scale: [1.2, 1, 1.2],
-            opacity: [0.5, 0.3, 0.5],
-          }}
-          transition={{ duration: 8, repeat: Infinity }}
-        />
-      </div>
-      
-      <div className="relative z-20 max-w-6xl mx-auto px-6 lg:px-8" style={{ opacity }}>
-        <div className="grid lg:grid-cols-2 gap-16 lg:gap-24">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="flex items-center gap-4 mb-6"
-            >
-              <div className="w-12 h-px bg-gradient-to-r from-transparent to-white/50" />
-              <span className="text-xs uppercase tracking-widest text-white/40">Qui suis-je</span>
-            </motion.div>
-            
-            <motion.h2
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="text-4xl sm:text-5xl md:text-6xl font-semibold text-white tracking-tight mb-8"
-            >
-              À propos
-            </motion.h2>
-            
-            <div className="space-y-6">
-              {[
-                `Je m'appelle Gawssou Thiam, passionné de technologie, d'intelligence artificielle et de digital, basé à Keur Massar, Dakar.`,
-                `Titulaire d'une Licence en Informatique, Réseaux et Télécommunications de l'IACD Barack Obama, je poursuis actuellement un Master en Génie Logiciel à l'Université Numérique Cheikh Hamidou Kane (UN-CHK) au Sénégal.`,
-                `Depuis toujours, je vis et respire la tech : je passe mes journées à explorer les dernières avancées en IA, à créer des expériences digitales futuristes et à imaginer comment ces outils peuvent transformer le quotidien des entreprises et des particuliers au Sénégal.`,
-              ].map((text, i) => (
-                <motion.p
-                  key={i}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.2 + i * 0.1 }}
-                  className="text-lg text-white/50 font-light leading-relaxed"
-                >
-                  {text}
-                </motion.p>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <motion.h3
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              className="text-xs font-medium text-white/30 uppercase tracking-widest mb-8"
-            >
-              Formation
-            </motion.h3>
-            
-            <div className="space-y-6">
-              {[
-                {
-                  title: 'Licence Informatique, Réseaux et Télécommunications',
-                  school: 'IACD Barack Obama',
-                  status: 'completed',
-                },
-                {
-                  title: 'Master Génie Logiciel',
-                  school: 'Université Numérique Cheikh Hamidou Kane (UN-CHK)',
-                  status: 'current',
-                },
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.3 + index * 0.15 }}
-                  whileHover={{ scale: 1.02, x: 5 }}
-                  className="p-6 rounded-2xl bg-black/50 backdrop-blur-sm border border-white/5 hover:border-white/20 transition-all duration-300"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h4 className="text-lg font-medium text-white mb-2">{item.title}</h4>
-                      <p className="text-sm text-white/40 font-light">{item.school}</p>
-                    </div>
-                    {item.status === 'current' && (
-                      <motion.span
-                        className="px-3 py-1 text-xs text-white/70 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full whitespace-nowrap"
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
-                        En cours
-                      </motion.span>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="mt-8 grid grid-cols-3 gap-4"
-            >
-              {[
-                { value: '5+', label: 'Services' },
-                { value: '10+', label: 'Projets' },
-                { value: '100%', label: 'Passion' },
-              ].map((stat, i) => (
-                <motion.div
-                  key={i}
-                  className="text-center p-4 rounded-xl bg-black/50 backdrop-blur-sm border border-white/5"
-                  whileHover={{ scale: 1.05, borderColor: 'rgba(255,255,255,0.2)' }}
-                >
-                  <div className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                    {stat.value}
-                  </div>
-                  <div className="text-xs text-white/40 mt-1">{stat.label}</div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ============================================
 // CTA SECTION
 // ============================================
 function CTASection() {
@@ -1388,6 +1220,7 @@ export default function Home() {
       <ServicesSection />
       <ProjectsSection />
       <AboutSection />
+      <TestimonialsSection />
       <CTASection />
       <Footer />
       
