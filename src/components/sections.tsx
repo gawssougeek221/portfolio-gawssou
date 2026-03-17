@@ -43,7 +43,7 @@ export function AboutSection() {
           >
             <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-4 border-black/50">
               <img 
-                src="/images/photo-gawssou.jpg" 
+                src="/images/about-portrait.png" 
                 alt="Gawssou Thiam"
                 className="w-full h-full object-cover"
               />
