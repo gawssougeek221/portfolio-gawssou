@@ -685,7 +685,7 @@ const PROJECTS_DATA: FocusRailItem[] = [
   {
     id: 3,
     title: 'Senestock AI',
-    description: 'Gestion de stock intelligente avec prédictions IA pour commerçants sénégalais. Optimisation des ventes.',
+    description: 'Solution intelligente de gestion pour commerçants et entreprises sénégalaises.',
     meta: "IA • Business",
     imageSrc: '/images/project-senestock.png',
     href: '#senestock',
@@ -701,7 +701,7 @@ const PROJECTS_DATA: FocusRailItem[] = [
   {
     id: 5,
     title: 'Sama Cours du Soir',
-    description: 'Apprentissage personnalisé avec IA, entièrement adapté au programme scolaire sénégalais.',
+    description: 'Plateforme d\'apprentissage innovante utilisant l\'intelligence artificielle.',
     meta: "Éducation • IA",
     imageSrc: '/images/service-community.png',
     href: '#cours',
@@ -709,7 +709,7 @@ const PROJECTS_DATA: FocusRailItem[] = [
   {
     id: 6,
     title: 'Projet Agritech',
-    description: 'Soutien intelligent aux agriculteurs sénégalais avec prévisions météo et conseils de culture IA.',
+    description: 'Solution technologique innovante pour le secteur agricole sénégalais.',
     meta: "Agriculture • IA",
     imageSrc: '/images/service-automation.png',
     href: '#agritech',
