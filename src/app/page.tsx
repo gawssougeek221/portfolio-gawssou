@@ -56,6 +56,15 @@ function SplineViewerBackground() {
                 visibility: hidden !important;
                 pointer-events: none !important;
               }
+              /* Center the Spline content */
+              :host {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+              }
+              canvas {
+                margin: 0 auto !important;
+              }
             `
             shadow.appendChild(style)
           }
@@ -125,10 +134,26 @@ function SplineViewerBackground() {
       <spline-viewer 
         url="https://prod.spline.design/m4QKQK7slm5uLuls/scene.splinecode"
         className="w-full h-full"
-        style={{ width: '100%', height: '100%' }}
+        style={{ 
+          width: '100%', 
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
         hide-logo="true"
         events="all"
       />
+      <style jsx global>{`
+        spline-viewer {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        spline-viewer canvas {
+          margin: 0 auto !important;
+        }
+      `}</style>
     </div>
   )
 }
