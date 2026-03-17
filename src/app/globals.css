@@ -323,19 +323,24 @@ a {
    SPLINE VIEWER - Hide watermark
    ============================================ */
 
-/* Hide "Built with Spline" logo - Multiple approaches */
+/* Hide "Built with Spline" logo - Multiple aggressive approaches */
 spline-viewer {
   --logo-opacity: 0 !important;
+  --spline-logo-opacity: 0 !important;
 }
 
-/* Shadow DOM parts */
+/* Shadow DOM parts - Spline uses these part names */
 spline-viewer::part(logo),
 spline-viewer::part(watermark),
 spline-viewer::part(logo-container),
-spline-viewer::part(spline-logo) {
+spline-viewer::part(spline-logo),
+spline-viewer::part(spline-watermark),
+spline-viewer::part(branding),
+spline-viewer::part(credits) {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* Fallback for any accessible elements */
@@ -343,9 +348,29 @@ spline-viewer a[href*="spline"],
 spline-viewer a[href*="splinetool"],
 spline-viewer [class*="logo"],
 spline-viewer [class*="watermark"],
+spline-viewer [class*="branding"],
 spline-viewer [id*="logo"],
-spline-viewer #logo {
+spline-viewer #logo,
+spline-viewer .logo,
+spline-viewer .watermark {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Additional cover overlay approach */
+.spline-container {
+  position: relative;
+}
+
+.spline-logo-cover {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 10;
 }

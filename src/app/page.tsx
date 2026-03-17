@@ -34,7 +34,7 @@ function SplineViewerBackground() {
     script.async = true
     document.body.appendChild(script)
     
-    // Hide Spline logo after viewer loads
+    // Hide Spline logo after viewer loads - Multiple attempts
     const hideLogo = () => {
       const viewers = document.querySelectorAll('spline-viewer')
       viewers.forEach((viewer) => {
@@ -42,36 +42,94 @@ function SplineViewerBackground() {
         try {
           const shadow = viewer.shadowRoot
           if (shadow) {
+            // Create comprehensive style to hide logo
             const style = document.createElement('style')
             style.textContent = `
+              /* Hide all possible logo elements */
               a[href*="spline.design"],
               a[href*="splinetool"],
               [class*="logo"],
+              [class*="Logo"],
               [class*="watermark"],
+              [class*="Watermark"],
+              [class*="branding"],
+              [class*="Branding"],
+              [class*="credits"],
+              [class*="Credits"],
               #logo,
-              .logo {
+              #Logo,
+              #watermark,
+              #Watermark,
+              .logo,
+              .Logo,
+              .watermark,
+              .Watermark,
+              div[class*="container"] > a,
+              div[style*="position: absolute"][style*="bottom"],
+              div[style*="bottom:"][style*="left:"] {
                 display: none !important;
                 opacity: 0 !important;
                 visibility: hidden !important;
                 pointer-events: none !important;
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
+              }
+              /* Specifically target bottom-right corner elements */
+              div[style*="position: absolute"],
+              div[style*="position:absolute"] {
+                opacity: 0 !important;
               }
             `
             shadow.appendChild(style)
+            
+            // Also try to find and hide specific elements
+            const allElements = shadow.querySelectorAll('*')
+            allElements.forEach((el: Element) => {
+              const htmlEl = el as HTMLElement
+              const style = htmlEl.getAttribute('style') || ''
+              const className = htmlEl.className || ''
+              const id = htmlEl.id || ''
+              
+              // Check if it's a logo-related element
+              if (
+                style.includes('position: absolute') && 
+                (style.includes('bottom') || style.includes('right')) ||
+                className.toLowerCase().includes('logo') ||
+                className.toLowerCase().includes('watermark') ||
+                id.toLowerCase().includes('logo') ||
+                id.toLowerCase().includes('watermark') ||
+                (htmlEl.tagName === 'A' && htmlEl.getAttribute('href')?.includes('spline'))
+              ) {
+                htmlEl.style.display = 'none'
+                htmlEl.style.opacity = '0'
+                htmlEl.style.visibility = 'hidden'
+              }
+            })
           }
         } catch (e) {
           // Shadow DOM not accessible, use CSS fallback
+          console.log('Shadow DOM not accessible:', e)
         }
       })
     }
     
-    // Wait for viewer to be defined and loaded
+    // Wait for viewer to be defined and loaded - Multiple attempts
     const checkViewer = setInterval(() => {
       const viewer = document.querySelector('spline-viewer')
       if (viewer) {
         clearInterval(checkViewer)
+        // Multiple attempts to hide logo
+        hideLogo()
+        setTimeout(hideLogo, 100)
         setTimeout(hideLogo, 500)
+        setTimeout(hideLogo, 1000)
+        setTimeout(hideLogo, 2000)
         // Also try after load event
         viewer.addEventListener('load', hideLogo)
+        // Also on any change
+        const observer = new MutationObserver(hideLogo)
+        observer.observe(viewer, { attributes: true, childList: true, subtree: true })
       }
     }, 100)
     
@@ -127,6 +185,13 @@ function SplineViewerBackground() {
         style={{ width: '100%', height: '100%' }}
         hide-logo="true"
         events="all"
+      />
+      {/* Visual cover overlay for logo - bottom right corner */}
+      <div 
+        className="absolute bottom-0 right-0 w-48 h-16 pointer-events-none z-20"
+        style={{
+          background: 'linear-gradient(to top left, rgba(0,0,0,1) 0%, rgba(0,0,0,0.8) 40%, transparent 100%)',
+        }}
       />
     </div>
   )
