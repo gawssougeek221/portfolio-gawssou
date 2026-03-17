@@ -43,14 +43,10 @@ export function AboutSection() {
           >
             <div className="relative w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-4 border-black/50">
               <img 
-                src="/images/about-portrait.png" 
+                src="/images/photo-gawssou.jpg" 
                 alt="Gawssou Thiam"
                 className="w-full h-full object-cover"
               />
-              {/* Fallback gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 to-cyan-600 flex items-center justify-center -z-10">
-                <span className="text-6xl font-bold text-white">GT</span>
-              </div>
             </div>
             {/* Status badge */}
             <motion.div
