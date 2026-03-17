@@ -1111,6 +1111,8 @@ function Footer() {
 function AvatarBubble() {
   const [isVisible, setIsVisible] = useState(false)
   const [showLoop, setShowLoop] = useState(false)
+  const [isMuted, setIsMuted] = useState(true)
+  const [showUnmuteHint, setShowUnmuteHint] = useState(false)
   const introVideoRef = useRef<HTMLVideoElement>(null)
   const loopVideoRef = useRef<HTMLVideoElement>(null)
   
@@ -1126,30 +1128,39 @@ function AvatarBubble() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isVisible])
 
-  // Play intro video with audio when visible
+  // Play intro video when visible (muted by default for autoplay policy)
   useEffect(() => {
     if (isVisible && introVideoRef.current) {
-      introVideoRef.current.play().catch(() => {
-        // Autoplay with sound might be blocked, try muted first
-        if (introVideoRef.current) {
-          introVideoRef.current.muted = true
-          introVideoRef.current.play()
-        }
-      })
+      introVideoRef.current.muted = true
+      introVideoRef.current.play()
+      // Show unmute hint after 1 second
+      setTimeout(() => setShowUnmuteHint(true), 1000)
     }
   }, [isVisible])
 
   // Play loop video when intro ends
   useEffect(() => {
     if (showLoop && loopVideoRef.current) {
-      loopVideoRef.current.play().catch(() => {
-        if (loopVideoRef.current) {
-          loopVideoRef.current.muted = true
-          loopVideoRef.current.play()
-        }
-      })
+      loopVideoRef.current.muted = isMuted
+      loopVideoRef.current.play()
     }
-  }, [showLoop])
+  }, [showLoop, isMuted])
+
+  // Toggle mute/unmute
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const newMuted = !isMuted
+    setIsMuted(newMuted)
+    setShowUnmuteHint(false)
+    
+    // Apply to current video
+    if (!showLoop && introVideoRef.current) {
+      introVideoRef.current.muted = newMuted
+    }
+    if (showLoop && loopVideoRef.current) {
+      loopVideoRef.current.muted = newMuted
+    }
+  }
 
   const handleClick = () => {
     window.open('https://wa.me/221771234567?text=Salut%20Gawssou%2C%20j%27ai%20vu%20ton%20avatar%21', '_blank')
@@ -1161,38 +1172,77 @@ function AvatarBubble() {
   if (!isVisible) return null
 
   return (
-    <div
-      onClick={handleClick}
-      className="fixed bottom-24 left-6 z-[55] w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] rounded-full overflow-hidden cursor-pointer"
-      style={{
-        background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(6,182,212,0.3) 100%)',
-        border: '2px solid rgba(139, 92, 246, 0.5)',
-        boxShadow: '0 0 30px rgba(139, 92, 246, 0.4)',
-      }}
-    >
-      {!showLoop ? (
-        <video
-          ref={introVideoRef}
-          className="w-full h-full object-cover"
-          autoPlay
-          playsInline
-          onEnded={() => setShowLoop(true)}
-          onError={() => setShowLoop(true)}
-        >
-          <source src={introUrl} type="video/mp4" />
-        </video>
-      ) : (
-        <video
-          ref={loopVideoRef}
-          className="w-full h-full object-cover"
-          autoPlay
-          loop
-          playsInline
-          muted={false}
-        >
-          <source src={loopUrl} type="video/mp4" />
-        </video>
-      )}
+    <div className="fixed bottom-24 left-6 z-[55] flex flex-col items-center gap-2">
+      {/* Unmute hint tooltip */}
+      <AnimatePresence>
+        {showUnmuteHint && isMuted && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.8 }}
+            className="absolute -top-12 left-0 px-3 py-2 bg-black/90 rounded-lg text-xs text-white whitespace-nowrap border border-purple-500/30"
+          >
+            🔊 Clique pour activer le son
+            <div className="absolute -bottom-1 left-4 w-2 h-2 bg-black/90 border-r border-b border-purple-500/30 transform rotate-45" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
+      {/* Avatar container */}
+      <div
+        onClick={handleClick}
+        className="relative w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] rounded-full overflow-hidden cursor-pointer"
+        style={{
+          background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(6,182,212,0.3) 100%)',
+          border: '2px solid rgba(139, 92, 246, 0.5)',
+          boxShadow: '0 0 30px rgba(139, 92, 246, 0.4)',
+        }}
+      >
+        {!showLoop ? (
+          <video
+            ref={introVideoRef}
+            className="w-full h-full object-cover"
+            autoPlay
+            playsInline
+            muted={isMuted}
+            onEnded={() => setShowLoop(true)}
+            onError={() => setShowLoop(true)}
+          >
+            <source src={introUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <video
+            ref={loopVideoRef}
+            className="w-full h-full object-cover"
+            autoPlay
+            loop
+            playsInline
+            muted={isMuted}
+          >
+            <source src={loopUrl} type="video/mp4" />
+          </video>
+        )}
+      </div>
+
+      {/* Sound toggle button */}
+      <motion.button
+        onClick={toggleMute}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="w-8 h-8 rounded-full flex items-center justify-center bg-black/70 border border-white/20 hover:border-purple-500/50 transition-colors"
+        title={isMuted ? "Activer le son" : "Couper le son"}
+      >
+        {isMuted ? (
+          <svg className="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+          </svg>
+        ) : (
+          <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+        )}
+      </motion.button>
     </div>
   )
 }
