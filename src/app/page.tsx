@@ -1106,103 +1106,65 @@ function Footer() {
 }
 
 // ============================================
-// AVATAR BUBBLE - Floating video avatar (simplified)
+// AVATAR BUBBLE - Simple version
 // ============================================
 function AvatarBubble() {
   const [isVisible, setIsVisible] = useState(false)
-  const [showLoop, setShowLoop] = useState(false)
-  const introVideoRef = useRef<HTMLVideoElement>(null)
-  const loopVideoRef = useRef<HTMLVideoElement>(null)
-
-  // Detect 2 scrolls to show bubble
+  
   useEffect(() => {
     let count = 0
     const handleScroll = () => {
       if (!isVisible) {
         count++
-        if (count >= 2) {
-          setIsVisible(true)
-        }
+        if (count >= 2) setIsVisible(true)
       }
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isVisible])
 
-  // Handle intro video ended - switch to loop
-  const handleIntroEnded = () => {
-    setShowLoop(true)
-    if (loopVideoRef.current) {
-      loopVideoRef.current.play()
-    }
-  }
-
-  // Click opens WhatsApp
   const handleClick = () => {
     window.open('https://wa.me/221771234567?text=Salut%20Gawssou%2C%20j%27ai%20vu%20ton%20avatar%21', '_blank')
   }
 
-  // Cloudinary video URLs
-  const introVideoUrl = 'https://res.cloudinary.com/dk0nh2e6b/video/upload/v1773557505/TON_PRESENTATION_d4w8sy.mp4'
-  const loopVideoUrl = 'https://res.cloudinary.com/dk0nh2e6b/video/upload/v1773557401/TON_LOOP_pmsblu.mp4'
+  const introUrl = 'https://res.cloudinary.com/dk0nh2e6b/video/upload/v1773557505/TON_PRESENTATION_d4w8sy.mp4'
+  const loopUrl = 'https://res.cloudinary.com/dk0nh2e6b/video/upload/v1773557401/TON_LOOP_pmsblu.mp4'
+  const [showLoop, setShowLoop] = useState(false)
+
+  if (!isVisible) return null
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ 
-        opacity: isVisible ? 1 : 0, 
-        scale: isVisible ? 1 : 0.5 
-      }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
+    <div
       onClick={handleClick}
-      className="fixed bottom-24 left-6 z-[55] w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] rounded-full overflow-hidden cursor-pointer group"
+      className="fixed bottom-24 left-6 z-[55] w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] rounded-full overflow-hidden cursor-pointer"
       style={{
         background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(6,182,212,0.3) 100%)',
         border: '2px solid rgba(139, 92, 246, 0.5)',
         boxShadow: '0 0 30px rgba(139, 92, 246, 0.4)',
       }}
     >
-      {/* Glow effect on hover */}
-      <motion.div
-        className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500/30 to-cyan-500/30 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-      
-      {/* Ring animation */}
-      <motion.div
-        className="absolute inset-0 rounded-full border-2 border-purple-400/50"
-        animate={{ scale: [1, 1.3], opacity: [0.5, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity }}
-      />
-
-      {/* Video container */}
-      <div className="relative w-full h-full">
-        {/* Intro video (plays once) */}
+      {!showLoop ? (
         <video
-          ref={introVideoRef}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showLoop ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          className="w-full h-full object-cover"
           autoPlay
           muted
           playsInline
-          onEnded={handleIntroEnded}
+          onEnded={() => setShowLoop(true)}
         >
-          <source src={introVideoUrl} type="video/mp4" />
+          <source src={introUrl} type="video/mp4" />
         </video>
-
-        {/* Loop video (infinite) */}
+      ) : (
         <video
-          ref={loopVideoRef}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showLoop ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-          autoPlay={showLoop}
+          className="w-full h-full object-cover"
+          autoPlay
           muted
           loop
           playsInline
         >
-          <source src={loopVideoUrl} type="video/mp4" />
+          <source src={loopUrl} type="video/mp4" />
         </video>
-      </div>
-    </motion.div>
+      )}
+    </div>
   )
 }
 
