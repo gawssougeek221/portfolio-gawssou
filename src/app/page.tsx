@@ -289,7 +289,7 @@ function Navigation() {
                 transition={{ delay: 0.3 }}
               >
                 <MagneticButton
-                  href="https://wa.me/221771234567"
+                  href="https://wa.me/221701056707"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-medium text-black bg-white px-5 py-2.5 rounded-lg hover:bg-white/90 transition-all duration-200 inline-flex items-center gap-2"
@@ -364,7 +364,7 @@ function Navigation() {
                 </motion.a>
               ))}
               <motion.a
-                href="https://wa.me/221771234567"
+                href="https://wa.me/221701056707"
                 target="_blank"
                 rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 30 }}
@@ -525,7 +525,7 @@ function NameRevealSection() {
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
           <MagneticButton
-            href="https://wa.me/221771234567"
+            href="https://wa.me/221701056707"
             target="_blank"
             rel="noopener noreferrer"
             className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-medium text-black bg-white overflow-hidden"
@@ -865,7 +865,7 @@ function CTASection() {
             transition={{ duration: 0.6, delay: 0.3 }}
           >
             <MagneticButton
-              href="https://wa.me/221771234567"
+              href="https://wa.me/221701056707"
               target="_blank"
               rel="noopener noreferrer"
               className="group relative inline-flex items-center justify-center gap-3 px-10 py-5 rounded-xl font-medium text-black bg-white overflow-hidden"
@@ -921,7 +921,7 @@ function Footer() {
             {['Services', 'Projets', 'WhatsApp'].map((item, i) => (
               <motion.a
                 key={item}
-                href={item === 'WhatsApp' ? 'https://wa.me/221771234567' : `#${item.toLowerCase()}`}
+                href={item === 'WhatsApp' ? 'https://wa.me/221701056707' : `#${item.toLowerCase()}`}
                 target={item === 'WhatsApp' ? '_blank' : undefined}
                 rel={item === 'WhatsApp' ? 'noopener noreferrer' : undefined}
                 className="text-sm text-white/30 hover:text-white transition-colors font-light relative group"
@@ -998,7 +998,7 @@ function AvatarBubble() {
   }
 
   const handleClick = () => {
-    window.open('https://wa.me/221771234567?text=Salut%20Gawssou%2C%20j%27ai%20vu%20ton%20avatar%21', '_blank')
+    window.open('https://wa.me/221701056707?text=Salut%20Gawssou%2C%20j%27ai%20vu%20ton%20avatar%21', '_blank')
   }
 
   const introUrl = 'https://res.cloudinary.com/dk0nh2e6b/video/upload/v1773557505/TON_PRESENTATION_d4w8sy.mp4'
@@ -1088,7 +1088,7 @@ function AvatarBubble() {
 function WhatsAppButton() {
   return (
     <motion.a
-      href="https://wa.me/221771234567"
+      href="https://wa.me/221701056707"
       target="_blank"
       rel="noopener noreferrer"
       initial={{ scale: 0, rotate: -180 }}
@@ -1181,7 +1181,7 @@ function ExitPopup() {
             </p>
 
             <motion.a
-              href="https://wa.me/221771234567"
+              href="https://wa.me/221701056707"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-medium text-black bg-white hover:bg-white/90 transition-all"
