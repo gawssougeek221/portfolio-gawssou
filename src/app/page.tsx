@@ -689,6 +689,7 @@ const PROJECTS_DATA: FocusRailItem[] = [
     meta: "IA • Business",
     imageSrc: '/images/project-senestock.png',
     href: '#senestock',
+    status: 'development',
   },
   {
     id: 4,
@@ -705,6 +706,7 @@ const PROJECTS_DATA: FocusRailItem[] = [
     meta: "Éducation • IA",
     imageSrc: '/images/service-community.png',
     href: '#cours',
+    status: 'development',
   },
   {
     id: 6,
@@ -713,6 +715,7 @@ const PROJECTS_DATA: FocusRailItem[] = [
     meta: "Agriculture • IA",
     imageSrc: '/images/service-automation.png',
     href: '#agritech',
+    status: 'development',
   },
 ]
 

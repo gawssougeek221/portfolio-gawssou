@@ -13,6 +13,7 @@ export type FocusRailItem = {
   imageSrc: string;
   href?: string;
   meta?: string;
+  status?: 'development' | 'completed';
 };
 
 interface FocusRailProps {
@@ -258,9 +259,16 @@ export function FocusRail({
                     {activeItem.meta}
                   </span>
                 )}
-                <h2 className="text-3xl font-bold tracking-tight md:text-4xl text-white">
-                  {activeItem.title}
-                </h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-3xl font-bold tracking-tight md:text-4xl text-white">
+                    {activeItem.title}
+                  </h2>
+                  {activeItem.status === 'development' && (
+                    <span className="px-2 py-1 text-xs font-medium bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-cyan-300 border border-cyan-500/30 rounded-full animate-pulse">
+                      🚧 En développement
+                    </span>
+                  )}
+                </div>
                 {activeItem.description && (
                   <p className="max-w-md text-neutral-400">
                     {activeItem.description}
