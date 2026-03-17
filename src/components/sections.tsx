@@ -261,10 +261,10 @@ export function TestimonialsSection() {
       avatar: 'FN',
     },
     {
-      name: 'Moussa Sow',
-      role: "Fondateur, Keur'Geek",
-      content: "Gawssou combine créativité et expertise technique. Un partenaire de confiance pour notre projet KEUR'GEEK.",
-      avatar: 'MS',
+      name: 'Ibrahima Fall',
+      role: 'Entrepreneur, Dakar',
+      content: 'Grâce à Gawssou, mon business a gagné en visibilité. Son expertise en IA m\'a permis d\'automatiser mes tâches quotidiennes.',
+      avatar: 'IF',
     },
   ]
 
