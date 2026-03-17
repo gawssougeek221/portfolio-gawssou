@@ -1106,128 +1106,13 @@ function Footer() {
 }
 
 // ============================================
-// AVATAR BUBBLE - Floating video avatar with real-time background removal
+// AVATAR BUBBLE - Floating video avatar (simplified)
 // ============================================
 function AvatarBubble() {
   const [isVisible, setIsVisible] = useState(false)
   const [showLoop, setShowLoop] = useState(false)
-  const [isModelLoaded, setIsModelLoaded] = useState(false)
-  const [videoError, setVideoError] = useState(false)
   const introVideoRef = useRef<HTMLVideoElement>(null)
   const loopVideoRef = useRef<HTMLVideoElement>(null)
-  const introCanvasRef = useRef<HTMLCanvasElement>(null)
-  const loopCanvasRef = useRef<HTMLCanvasElement>(null)
-  const segmenterRef = useRef<any>(null)
-  const animationFrameRef = useRef<number>(0)
-  const processingRef = useRef(false)
-
-  // Initialize MediaPipe Selfie Segmentation
-  useEffect(() => {
-    const initSegmenter = async () => {
-      try {
-        // @ts-ignore
-        const { SelfieSegmentation } = await import('@mediapipe/selfie_segmentation')
-        
-        const segmenter = new SelfieSegmentation({
-          locateFile: (file: string) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
-          }
-        })
-        
-        segmenter.setOptions({
-          modelSelection: 1, // 1 for landscape model (better quality)
-          selfieMode: true,
-        })
-        
-        await segmenter.initialize()
-        segmenterRef.current = segmenter
-        setIsModelLoaded(true)
-        console.log('✅ MediaPipe Selfie Segmentation loaded')
-      } catch (error) {
-        console.error('Error loading MediaPipe:', error)
-        setIsModelLoaded(true) // Continue without background removal
-      }
-    }
-    
-    initSegmenter()
-    
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current)
-      }
-    }
-  }, [])
-
-  // Process video frame and remove background
-  const processFrame = useCallback((
-    video: HTMLVideoElement | null,
-    canvas: HTMLCanvasElement | null
-  ) => {
-    if (!video || !canvas || video.paused || video.ended || processingRef.current) return
-    
-    processingRef.current = true
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    if (!ctx) {
-      processingRef.current = false
-      return
-    }
-    
-    const width = 180
-    const height = 180
-    
-    canvas.width = width
-    canvas.height = height
-    
-    if (segmenterRef.current && video.readyState >= 2) {
-      segmenterRef.current.segment(video, (results: any) => {
-        // Clear canvas
-        ctx.clearRect(0, 0, width, height)
-        
-        // Draw original video frame
-        ctx.drawImage(video, 0, 0, width, height)
-        
-        // Get image data and apply mask
-        const imageData = ctx.getImageData(0, 0, width, height)
-        const data = imageData.data
-        const mask = results.segmentationMask
-        
-        if (mask) {
-          // Create temporary canvas for mask
-          const maskCanvas = document.createElement('canvas')
-          maskCanvas.width = width
-          maskCanvas.height = height
-          const maskCtx = maskCanvas.getContext('2d')
-          
-          if (maskCtx) {
-            maskCtx.drawImage(mask, 0, 0, width, height)
-            const maskData = maskCtx.getImageData(0, 0, width, height).data
-            
-            // Apply mask to remove background
-            for (let i = 0; i < data.length; i += 4) {
-              const maskValue = maskData[i] / 255
-              // Set alpha based on mask (person = opaque, background = transparent)
-              data[i + 3] = Math.round(maskValue * 255)
-            }
-          }
-        }
-        
-        ctx.putImageData(imageData, 0, 0)
-        processingRef.current = false
-        
-        // Continue processing
-        animationFrameRef.current = requestAnimationFrame(() => {
-          processFrame(video, canvas)
-        })
-      })
-    } else {
-      // Fallback: just draw video without background removal
-      ctx.drawImage(video, 0, 0, width, height)
-      processingRef.current = false
-      animationFrameRef.current = requestAnimationFrame(() => {
-        processFrame(video, canvas)
-      })
-    }
-  }, [])
 
   // Detect 2 scrolls to show bubble
   useEffect(() => {
@@ -1244,45 +1129,11 @@ function AvatarBubble() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isVisible])
 
-  // Start processing when intro video is ready
-  useEffect(() => {
-    if (isVisible && isModelLoaded && introVideoRef.current && introCanvasRef.current) {
-      const video = introVideoRef.current
-      const canvas = introCanvasRef.current
-      
-      const handleLoadedData = () => {
-        processFrame(video, canvas)
-      }
-      
-      if (video.readyState >= 2) {
-        handleLoadedData()
-      } else {
-        video.addEventListener('loadeddata', handleLoadedData)
-      }
-      
-      return () => video.removeEventListener('loadeddata', handleLoadedData)
-    }
-  }, [isVisible, isModelLoaded, processFrame])
-
   // Handle intro video ended - switch to loop
   const handleIntroEnded = () => {
     setShowLoop(true)
-    // Cancel intro processing
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current)
-    }
-    processingRef.current = false
-    // Start loop video processing
-    if (loopVideoRef.current && loopCanvasRef.current) {
-      const video = loopVideoRef.current
-      const canvas = loopCanvasRef.current
-      
-      const handleLoadedData = () => {
-        processFrame(video, canvas)
-      }
-      
-      video.addEventListener('loadeddata', handleLoadedData)
-      video.play().catch(() => {})
+    if (loopVideoRef.current) {
+      loopVideoRef.current.play()
     }
   }
 
@@ -1291,7 +1142,7 @@ function AvatarBubble() {
     window.open('https://wa.me/221771234567?text=Salut%20Gawssou%2C%20j%27ai%20vu%20ton%20avatar%21', '_blank')
   }
 
-  // Cloudinary video URLs (fast CDN with CORS support)
+  // Cloudinary video URLs
   const introVideoUrl = 'https://res.cloudinary.com/dk0nh2e6b/video/upload/v1773557505/TON_PRESENTATION_d4w8sy.mp4'
   const loopVideoUrl = 'https://res.cloudinary.com/dk0nh2e6b/video/upload/v1773557401/TON_LOOP_pmsblu.mp4'
 
@@ -1306,11 +1157,9 @@ function AvatarBubble() {
       onClick={handleClick}
       className="fixed bottom-24 left-6 z-[55] w-[70px] h-[70px] sm:w-[90px] sm:h-[90px] rounded-full overflow-hidden cursor-pointer group"
       style={{
-        background: videoError 
-          ? 'linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)'
-          : 'transparent',
-        border: videoError ? '2px solid rgba(139, 92, 246, 0.5)' : 'none',
-        boxShadow: videoError ? '0 0 30px rgba(139, 92, 246, 0.4)' : 'none',
+        background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(6,182,212,0.3) 100%)',
+        border: '2px solid rgba(139, 92, 246, 0.5)',
+        boxShadow: '0 0 30px rgba(139, 92, 246, 0.4)',
       }}
     >
       {/* Glow effect on hover */}
@@ -1327,59 +1176,31 @@ function AvatarBubble() {
         transition={{ duration: 1.5, repeat: Infinity }}
       />
 
-      {/* Video container with canvas overlay */}
+      {/* Video container */}
       <div className="relative w-full h-full">
-        {/* Hidden videos for processing */}
+        {/* Intro video (plays once) */}
         <video
           ref={introVideoRef}
-          className="absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showLoop ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
           autoPlay
           muted
           playsInline
-          crossOrigin="anonymous"
           onEnded={handleIntroEnded}
-          onError={() => setVideoError(true)}
         >
           <source src={introVideoUrl} type="video/mp4" />
         </video>
 
+        {/* Loop video (infinite) */}
         <video
           ref={loopVideoRef}
-          className="absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none"
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showLoop ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          autoPlay={showLoop}
           muted
           loop
           playsInline
-          crossOrigin="anonymous"
-          onError={() => setVideoError(true)}
         >
           <source src={loopVideoUrl} type="video/mp4" />
         </video>
-
-        {/* Visible canvases with processed video */}
-        <canvas
-          ref={introCanvasRef}
-          className={`absolute inset-0 w-full h-full object-cover rounded-full transition-opacity duration-300 ${showLoop ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-          style={{ width: '100%', height: '100%' }}
-        />
-        
-        <canvas
-          ref={loopCanvasRef}
-          className={`absolute inset-0 w-full h-full object-cover rounded-full transition-opacity duration-300 ${showLoop ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-          style={{ width: '100%', height: '100%' }}
-        />
-
-        {/* Fallback: Show avatar icon if video fails */}
-        {videoError && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="text-white text-3xl"
-            >
-              👋
-            </motion.div>
-          </div>
-        )}
       </div>
     </motion.div>
   )
