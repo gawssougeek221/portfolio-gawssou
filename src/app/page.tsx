@@ -1106,10 +1106,13 @@ function Footer() {
 }
 
 // ============================================
-// AVATAR BUBBLE - Simple version
+// AVATAR BUBBLE - With Audio & Loop
 // ============================================
 function AvatarBubble() {
   const [isVisible, setIsVisible] = useState(false)
+  const [showLoop, setShowLoop] = useState(false)
+  const introVideoRef = useRef<HTMLVideoElement>(null)
+  const loopVideoRef = useRef<HTMLVideoElement>(null)
   
   useEffect(() => {
     let count = 0
@@ -1123,13 +1126,37 @@ function AvatarBubble() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isVisible])
 
+  // Play intro video with audio when visible
+  useEffect(() => {
+    if (isVisible && introVideoRef.current) {
+      introVideoRef.current.play().catch(() => {
+        // Autoplay with sound might be blocked, try muted first
+        if (introVideoRef.current) {
+          introVideoRef.current.muted = true
+          introVideoRef.current.play()
+        }
+      })
+    }
+  }, [isVisible])
+
+  // Play loop video when intro ends
+  useEffect(() => {
+    if (showLoop && loopVideoRef.current) {
+      loopVideoRef.current.play().catch(() => {
+        if (loopVideoRef.current) {
+          loopVideoRef.current.muted = true
+          loopVideoRef.current.play()
+        }
+      })
+    }
+  }, [showLoop])
+
   const handleClick = () => {
     window.open('https://wa.me/221771234567?text=Salut%20Gawssou%2C%20j%27ai%20vu%20ton%20avatar%21', '_blank')
   }
 
   const introUrl = 'https://res.cloudinary.com/dk0nh2e6b/video/upload/v1773557505/TON_PRESENTATION_d4w8sy.mp4'
   const loopUrl = 'https://res.cloudinary.com/dk0nh2e6b/video/upload/v1773557401/TON_LOOP_pmsblu.mp4'
-  const [showLoop, setShowLoop] = useState(false)
 
   if (!isVisible) return null
 
@@ -1145,21 +1172,23 @@ function AvatarBubble() {
     >
       {!showLoop ? (
         <video
+          ref={introVideoRef}
           className="w-full h-full object-cover"
           autoPlay
-          muted
           playsInline
           onEnded={() => setShowLoop(true)}
+          onError={() => setShowLoop(true)}
         >
           <source src={introUrl} type="video/mp4" />
         </video>
       ) : (
         <video
+          ref={loopVideoRef}
           className="w-full h-full object-cover"
           autoPlay
-          muted
           loop
           playsInline
+          muted={false}
         >
           <source src={loopUrl} type="video/mp4" />
         </video>
