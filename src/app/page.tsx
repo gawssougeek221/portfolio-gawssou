@@ -33,6 +33,7 @@ import {
   FileText,
   ChevronDown
 } from "lucide-react";
+import { WordRotate } from "@/components/ui/word-rotate";
 
 declare global {
   namespace JSX {
@@ -408,9 +409,24 @@ export default function Home() {
                 Thiam
               </span>
             </h1>
-            <p className="text-xl sm:text-2xl md:text-3xl font-medium text-neutral-200 tracking-tight">
-              Informaticien &amp; Entrepreneur Numérique
-            </p>
+            <div className="text-xl sm:text-2xl md:text-3xl font-medium text-neutral-200 tracking-tight">
+              <WordRotate
+                duration={3000}
+                words={[
+                  "Informaticien & Entrepreneur Numérique",
+                  "Fondateur de Keur'Geek Digital",
+                  "Expert en Intelligence Artificielle",
+                  "Formateur & Développeur Web",
+                ]}
+                className="text-xl sm:text-2xl md:text-3xl font-medium text-neutral-200 tracking-tight"
+                framerProps={{
+                  initial: { opacity: 0, y: -20 },
+                  animate: { opacity: 1, y: 0 },
+                  exit: { opacity: 0, y: 20 },
+                  transition: { duration: 0.3, ease: "easeOut" },
+                }}
+              />
+            </div>
             <p className="text-sm sm:text-base md:text-lg text-neutral-400 font-normal leading-relaxed max-w-3xl">
               Fondateur de <strong className="text-white">Keur’Geek Digital</strong>. Spécialisé en{" "}
               <span className="text-cyan-300">Intelligence Artificielle</span>,{" "}
