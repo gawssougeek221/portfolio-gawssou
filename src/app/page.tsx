@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -35,6 +35,9 @@ import {
 } from "lucide-react";
 import { WordRotate } from "@/components/ui/word-rotate";
 import { TalkingAvatar } from "@/components/ui/talking-avatar";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
+import { Parallax, Drift, Reveal, ScaleOnScroll } from "@/components/ui/parallax";
+import { ScrollyJourney } from "@/components/ui/scrolly-journey";
 
 declare global {
   namespace JSX {
@@ -58,13 +61,23 @@ export default function Home() {
 
   const splineWrapperRef = useRef<HTMLDivElement>(null);
   const bgOverlayRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const orbsRef = useRef<HTMLDivElement>(null);
+
+  // Parallax global : orbes de fond + contenu hero
+  const { scrollYProgress: pageScroll } = useScroll();
+  const orbsY = useTransform(pageScroll, [0, 1], [0, 300]);
+  const heroContentY = useTransform(pageScroll, [0, 0.25], [0, 140]);
+  const heroFade = useTransform(pageScroll, [0, 0.22], [1, 0]);
+  const splineY = useTransform(pageScroll, [0, 0.4], ["0%", "18%"]);
+  const splineScale = useTransform(pageScroll, [0, 0.4], [1, 1.12]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       gsap.registerPlugin(ScrollTrigger);
 
       const ctx = gsap.context(() => {
-        // Blur spline 3D background as user scrolls down past the hero intro
+        // Blur + assombrit le fond Spline 3D au scroll passé le hero
         gsap.to(splineWrapperRef.current, {
           scrollTrigger: {
             trigger: ".gsap-hero-trigger",
@@ -114,6 +127,72 @@ export default function Home() {
           duration: 0.8,
           ease: "power2.out"
         });
+
+        // ——— NOUVEAU : parallax générique ———
+        // Tout élément [data-parallax="0.2"] bouge à 20% de la vitesse du scroll
+        gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((el) => {
+          const speed = parseFloat(el.dataset.parallax || "0.15");
+          gsap.to(el, {
+            yPercent: speed * 100,
+            ease: "none",
+            scrollTrigger: {
+              trigger: el.closest("section") || el,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1.2
+            }
+          });
+        });
+
+        // ——— NOUVEAU : reveal générique [data-reveal] ———
+        gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
+          gsap.from(el, {
+            opacity: 0,
+            y: 48,
+            duration: 0.9,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 88%",
+              toggleActions: "play none none reverse"
+            }
+          });
+        });
+
+        // ——— NOUVEAU : zoom scrollytelling sur les visuels [data-zoom] ———
+        gsap.utils.toArray<HTMLElement>("[data-zoom]").forEach((el) => {
+          gsap.fromTo(
+            el,
+            { scale: 0.92, opacity: 0.5 },
+            {
+              scale: 1,
+              opacity: 1,
+              ease: "none",
+              scrollTrigger: {
+                trigger: el,
+                start: "top 95%",
+                end: "center 55%",
+                scrub: 1
+              }
+            }
+          );
+        });
+
+        // ——— NOUVEAU : ligne de timeline éducation qui se remplit au scroll ———
+        gsap.fromTo(
+          ".gsap-timeline-line",
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".gsap-timeline-container",
+              start: "top 75%",
+              end: "bottom 55%",
+              scrub: 1
+            }
+          }
+        );
       });
 
       return () => ctx.revert();
@@ -215,12 +294,36 @@ export default function Home() {
       : projects.filter((p) => p.category === activeTab || p.id === "keurgeek-digital");
 
   return (
-    <div className="min-h-screen bg-black text-neutral-100 selection:bg-purple-600 selection:text-white relative font-sans">
-      {/* Fixed 3D Spline Canvas Interactive Robot Background */}
-      <div
+    <div className="min-h-screen bg-black text-neutral-100 selection:bg-purple-600 selection:text-white relative font-sans overflow-x-clip">
+      {/* Barre de progression du scroll (scrollytelling) */}
+      <ScrollProgress />
+
+      {/* Orbes parallax globaux — profondeur derrière tout le contenu */}
+      <motion.div
+        ref={orbsRef}
+        style={{ y: orbsY }}
+        aria-hidden
+        className="fixed inset-0 z-[1] pointer-events-none overflow-hidden"
+      >
+        <div
+          data-parallax="0.25"
+          className="absolute top-[15%] -left-32 w-[480px] h-[480px] rounded-full bg-cyan-500/10 blur-[120px]"
+        />
+        <div
+          data-parallax="-0.2"
+          className="absolute top-[45%] -right-32 w-[520px] h-[520px] rounded-full bg-purple-500/10 blur-[130px]"
+        />
+        <div
+          data-parallax="0.35"
+          className="absolute bottom-[5%] left-1/3 w-[420px] h-[420px] rounded-full bg-pink-500/[0.07] blur-[120px]"
+        />
+      </motion.div>
+
+      {/* Fixed 3D Spline Canvas Interactive Robot Background — avec parallax */}
+      <motion.div
         ref={splineWrapperRef}
-        className="fixed inset-0 z-0 pointer-events-auto transition-all duration-500 overflow-hidden"
-        style={{ filter: "blur(0px)" }}
+        style={{ y: splineY, scale: splineScale, filter: "blur(0px)" }}
+        className="fixed inset-0 z-0 pointer-events-auto transition-all duration-500 overflow-hidden will-change-transform"
       >
         <div
           ref={bgOverlayRef}
@@ -235,10 +338,7 @@ export default function Home() {
             events="all"
           />
         </div>
-      </div>
-
-      {/* Progress Bar Top Accent */}
-      <div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 z-[100]" />
+      </motion.div>
 
       {/* Navigation Header */}
       <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/60 border-b border-white/10 transition-all duration-300">
@@ -370,10 +470,24 @@ export default function Home() {
         </AnimatePresence>
       </header>
 
-      {/* SECTION 1: Full-Screen 3D Robot Viewport with Scroll Indicator */}
-      <section className="relative h-screen w-full flex flex-col justify-between items-center z-10 pointer-events-none pt-24 pb-12 px-6">
+      {/* SECTION 1: Full-Screen 3D Robot Viewport with Scroll Indicator + parallax */}
+      <motion.section
+        ref={heroRef}
+        style={{ opacity: heroFade }}
+        className="relative h-screen w-full flex flex-col justify-between items-center z-10 pointer-events-none pt-24 pb-12 px-6"
+      >
+        {/* Titre fantôme parallax derrière le robot */}
+        <div
+          data-parallax="0.3"
+          aria-hidden
+          className="absolute inset-0 flex items-center justify-center select-none pointer-events-none"
+        >
+          <span className="font-black uppercase tracking-tight text-[18vw] leading-none text-white/[0.04]">
+            Gawssou
+          </span>
+        </div>
         <div />
-        
+
         {/* Floating Scroll Indicator at bottom */}
         <motion.a
           href="#hero-info"
@@ -385,11 +499,12 @@ export default function Home() {
           <span className="text-xs uppercase tracking-widest font-mono text-neutral-300">SCROLL</span>
           <ChevronDown className="w-4 h-4 text-cyan-400 animate-bounce" />
         </motion.a>
-      </section>
+      </motion.section>
 
-      {/* SECTION 2: Hero Information Revealed on Scroll */}
+      {/* SECTION 2: Hero Information Revealed on Scroll — avec parallax au scroll */}
       <section id="hero-info" className="gsap-hero-trigger relative z-10 pt-16 pb-20 md:pt-24 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <div className="gsap-hero-content text-center md:text-left space-y-8 bg-black/60 p-8 md:p-12 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
+        <motion.div style={{ y: heroContentY }}>
+        <div data-zoom className="gsap-hero-content text-center md:text-left space-y-8 bg-black/60 p-8 md:p-12 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
           {/* Status Badges */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md text-emerald-400 text-xs font-medium">
@@ -496,13 +611,20 @@ export default function Home() {
             </div>
           </div>
         </div>
+        </motion.div>
       </section>
 
-      {/* Profil Professionnel & Vision Section */}
-      <section id="about" className="relative z-10 py-20 bg-neutral-950/70 border-y border-white/10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Profil Professionnel & Vision Section — titres avec drift parallax */}
+      <section id="about" className="relative z-10 py-20 bg-neutral-950/70 border-y border-white/10 overflow-hidden">
+        {/* Mot géant en fond qui dérive au scroll */}
+        <Drift from="6%" to="-6%" className="absolute top-4 left-0 right-0 pointer-events-none select-none">
+          <div aria-hidden className="text-center font-black uppercase tracking-tight text-[13vw] md:text-8xl leading-none text-white/[0.04]">
+            Vision • Mission • Impact
+          </div>
+        </Drift>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-5 space-y-6">
+            <Reveal className="lg:col-span-5 space-y-6">
               <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-cyan-400">
                 <Users className="w-4 h-4" />
                 <span>À propos de moi</span>
@@ -520,7 +642,13 @@ export default function Home() {
                 dans l'adoption des technologies modernes : du développement d'applications web et
                 mobile à l'intégration d'assistants IA et à l'automatisation des processus métier.
               </p>
-            </div>
+              <div data-parallax="0.12" className="hidden lg:block pt-2">
+                <div className="inline-flex items-center gap-2 text-[11px] font-mono text-neutral-500 border border-white/10 rounded-full px-3 py-1.5 bg-white/[0.03]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  Faites défiler — chaque carte se révèle au scroll
+                </div>
+              </div>
+            </Reveal>
 
             {/* Keur'Geek Digital Capabilities Cards */}
             <div className="lg:col-span-7 grid sm:grid-cols-2 gap-4 gsap-cards-container">
@@ -572,9 +700,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services & Formations Section */}
-      <section id="services" className="relative z-10 py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
+      {/* ——— SCROLLYTELLING : histoire sticky qui se dévoile au scroll ——— */}
+      <ScrollyJourney />
+
+      {/* Services & Formations Section — reveal + parallax */}
+      <section id="services" className="relative z-10 py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <Drift from="10%" to="-10%" className="absolute top-2 left-0 right-0 pointer-events-none select-none">
+          <div aria-hidden className="text-center font-black uppercase text-6xl md:text-8xl leading-none text-white/[0.03]">
+            Services
+          </div>
+        </Drift>
+        <Reveal className="text-center max-w-3xl mx-auto space-y-4 mb-14 relative">
           <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-purple-400">
             <Zap className="w-4 h-4" />
             <span>Offres &amp; Activités</span>
@@ -586,10 +722,11 @@ export default function Home() {
             Des prestations adaptées aussi bien aux entreprises qu'aux apprenants cherchant à se
             former aux outils informatiques et à l'intelligence artificielle.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-4">
+        <div className="grid md:grid-cols-3 gap-6 relative">
+          <Parallax speed={-30} className="h-full">
+          <div data-zoom className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-4 h-full">
             <div className="space-y-3">
               <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
                 <Bot className="w-6 h-6" />
@@ -611,8 +748,10 @@ export default function Home() {
               </li>
             </ul>
           </div>
+          </Parallax>
 
-          <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 hover:border-purple-500/40 transition-all flex flex-col justify-between space-y-4">
+          <Parallax speed={30} className="h-full">
+          <div data-zoom className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 hover:border-purple-500/40 transition-all flex flex-col justify-between space-y-4 h-full">
             <div className="space-y-3">
               <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
                 <BookOpen className="w-6 h-6" />
@@ -634,8 +773,10 @@ export default function Home() {
               </li>
             </ul>
           </div>
+          </Parallax>
 
-          <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 hover:border-emerald-500/40 transition-all flex flex-col justify-between space-y-4">
+          <Parallax speed={-20} className="h-full">
+          <div data-zoom className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 hover:border-emerald-500/40 transition-all flex flex-col justify-between space-y-4 h-full">
             <div className="space-y-3">
               <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                 <Code className="w-6 h-6" />
@@ -657,12 +798,18 @@ export default function Home() {
               </li>
             </ul>
           </div>
+          </Parallax>
         </div>
       </section>
 
-      {/* Projects Showcase */}
-      <section id="projects" className="relative z-10 py-20 bg-neutral-950/80 border-y border-white/10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Projects Showcase — scrollytelling par lots */}
+      <section id="projects" className="relative z-10 py-20 bg-neutral-950/80 border-y border-white/10 overflow-hidden">
+        <Drift from="8%" to="-8%" className="absolute top-6 left-0 right-0 pointer-events-none select-none">
+          <div aria-hidden className="text-center font-black uppercase text-6xl md:text-8xl leading-none text-white/[0.03]">
+            Projets • IA • Web
+          </div>
+        </Drift>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-400">
@@ -770,9 +917,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Compétences Section */}
-      <section id="skills" className="relative z-10 py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
+      {/* Compétences Section — stagger parallax */}
+      <section id="skills" className="relative z-10 py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <Reveal className="text-center max-w-3xl mx-auto space-y-4 mb-14">
           <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-cyan-400">
             <Wrench className="w-4 h-4" />
             <span>Savoir-faire technique</span>
@@ -784,11 +931,11 @@ export default function Home() {
             Stack technologique maitrisée pour le développement de logiciels, les intégrations d'IA,
             l'automatisation et l'ingénierie pédagogique.
           </p>
-        </div>
+        </Reveal>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Développement */}
-          <div className="p-6 rounded-2xl bg-neutral-900/60 border border-white/10 hover:border-cyan-500/40 transition-all space-y-4">
+          <div data-reveal className="p-6 rounded-2xl bg-neutral-900/60 border border-white/10 hover:border-cyan-500/40 transition-all space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                 <Code className="w-5 h-5" />
@@ -821,7 +968,7 @@ export default function Home() {
           </div>
 
           {/* Intelligence Artificielle */}
-          <div className="p-6 rounded-2xl bg-neutral-900/60 border border-white/10 hover:border-purple-500/40 transition-all space-y-4">
+          <div data-reveal className="p-6 rounded-2xl bg-neutral-900/60 border border-white/10 hover:border-purple-500/40 transition-all space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
                 <Cpu className="w-5 h-5" />
@@ -851,7 +998,7 @@ export default function Home() {
           </div>
 
           {/* Automatisation */}
-          <div className="p-6 rounded-2xl bg-neutral-900/60 border border-white/10 hover:border-emerald-500/40 transition-all space-y-4">
+          <div data-reveal className="p-6 rounded-2xl bg-neutral-900/60 border border-white/10 hover:border-emerald-500/40 transition-all space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <Workflow className="w-5 h-5" />
@@ -875,7 +1022,7 @@ export default function Home() {
           </div>
 
           {/* Outils & Pédagogie */}
-          <div className="p-6 rounded-2xl bg-neutral-900/60 border border-white/10 hover:border-pink-500/40 transition-all space-y-4">
+          <div data-reveal className="p-6 rounded-2xl bg-neutral-900/60 border border-white/10 hover:border-pink-500/40 transition-all space-y-4">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-pink-500/10 text-pink-400 border border-pink-500/20">
                 <BookOpen className="w-5 h-5" />
@@ -903,10 +1050,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Parcours Académique & Professionnel */}
-      <section id="education" className="relative z-10 py-20 bg-neutral-950/80 border-t border-white/10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
+      {/* Parcours Académique & Professionnel — timeline scrollytelling */}
+      <section id="education" className="relative z-10 py-20 bg-neutral-950/80 border-t border-white/10 overflow-hidden">
+        <Drift from="6%" to="-6%" className="absolute top-6 left-0 right-0 pointer-events-none select-none">
+          <div aria-hidden className="text-center font-black uppercase text-6xl md:text-8xl leading-none text-white/[0.03]">
+            Parcours
+          </div>
+        </Drift>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <Reveal className="text-center max-w-3xl mx-auto space-y-4 mb-16">
             <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-purple-400">
               <GraduationCap className="w-4 h-4" />
               <span>Cursus &amp; Certifications</span>
@@ -918,9 +1070,13 @@ export default function Home() {
               Informations rigoureuses et vérifiées sur l'ensemble de mon parcours d'études et de
               formation continue.
             </p>
-          </div>
+          </Reveal>
 
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-8 gsap-timeline-container relative">
+            {/* Ligne verticale qui se remplit au scroll (desktop) */}
+            <div aria-hidden className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-white/10">
+              <div className="gsap-timeline-line w-full h-full origin-top bg-gradient-to-b from-cyan-400 via-purple-500 to-pink-500" />
+            </div>
             {/* Academic Degrees */}
             <div className="space-y-6">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
@@ -1050,9 +1206,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Contact Section */}
+      {/* Contact Section — zoom scrollytelling final */}
       <section id="contact" className="relative z-10 py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-neutral-900 via-neutral-900/90 to-neutral-950 border border-white/15 relative overflow-hidden">
+        <ScaleOnScroll>
+        <div data-zoom className="p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-neutral-900 via-neutral-900/90 to-neutral-950 border border-white/15 relative overflow-hidden">
           <div className="absolute -top-24 -right-24 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -1173,6 +1330,7 @@ export default function Home() {
             </div>
           </div>
         </div>
+        </ScaleOnScroll>
       </section>
 
       {/* Footer */}
