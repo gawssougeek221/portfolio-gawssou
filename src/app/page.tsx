@@ -34,6 +34,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import { WordRotate } from "@/components/ui/word-rotate";
+import { TalkingAvatar } from "@/components/ui/talking-avatar";
 
 declare global {
   namespace JSX {
@@ -1212,6 +1213,16 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Talking Avatar */}
+      <TalkingAvatar
+        messages={[
+          "Besoin d'un développeur ?",
+          "Discutons de votre projet !",
+          "IA & Automation",
+          "Contactez-moi sur WhatsApp",
+        ]}
+      />
     </div>
   );
 }
