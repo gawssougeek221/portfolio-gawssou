@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -49,6 +50,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className="dark scroll-smooth">
+      <head>
+        <Script
+          src="https://unpkg.com/@splinetool/viewer@1.9.72/build/spline-viewer.js"
+          type="module"
+          strategy="afterInteractive"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white selection:bg-purple-500 selection:text-white`}
       >
@@ -57,4 +65,5 @@ export default function RootLayout({
     </html>
   );
 }
+
 
