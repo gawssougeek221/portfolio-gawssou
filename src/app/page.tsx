@@ -54,13 +54,38 @@ export default function Home() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"all" | "ia" | "web" | "dev">("all");
 
-  const heroContentRef = useRef<HTMLDivElement>(null);
+  const splineWrapperRef = useRef<HTMLDivElement>(null);
+  const bgOverlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       gsap.registerPlugin(ScrollTrigger);
 
       const ctx = gsap.context(() => {
+        // Blur spline 3D background as user scrolls down past the hero intro
+        gsap.to(splineWrapperRef.current, {
+          scrollTrigger: {
+            trigger: ".gsap-hero-trigger",
+            start: "top 95%",
+            end: "top 15%",
+            scrub: true
+          },
+          filter: "blur(12px)",
+          opacity: 0.8,
+          ease: "none"
+        });
+
+        gsap.to(bgOverlayRef.current, {
+          scrollTrigger: {
+            trigger: ".gsap-hero-trigger",
+            start: "top 95%",
+            end: "top 15%",
+            scrub: true
+          },
+          backgroundColor: "rgba(0, 0, 0, 0.75)",
+          ease: "none"
+        });
+
         // Reveal Hero content on scroll over the Spline robot canvas
         gsap.from(".gsap-hero-content", {
           scrollTrigger: {
@@ -190,8 +215,15 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-black text-neutral-100 selection:bg-purple-600 selection:text-white relative font-sans">
       {/* Fixed 3D Spline Canvas Interactive Robot Background */}
-      <div className="fixed inset-0 z-0 pointer-events-auto transition-all duration-500 overflow-hidden">
-        <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
+      <div
+        ref={splineWrapperRef}
+        className="fixed inset-0 z-0 pointer-events-auto transition-all duration-500 overflow-hidden"
+        style={{ filter: "blur(0px)" }}
+      >
+        <div
+          ref={bgOverlayRef}
+          className="absolute inset-0 bg-black/40 z-10 pointer-events-none transition-all duration-500"
+        />
         <div className="absolute inset-0 flex items-center justify-center">
           {/* @ts-ignore */}
           <spline-viewer
