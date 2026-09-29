@@ -30,7 +30,8 @@ import {
   Layers,
   Bot,
   PackageCheck,
-  FileText
+  FileText,
+  ChevronDown
 } from "lucide-react";
 
 declare global {
@@ -53,46 +54,40 @@ export default function Home() {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"all" | "ia" | "web" | "dev">("all");
 
-  const heroRef = useRef<HTMLDivElement>(null);
-  const servicesRef = useRef<HTMLDivElement>(null);
-  const projectsRef = useRef<HTMLDivElement>(null);
-  const skillsRef = useRef<HTMLDivElement>(null);
+  const heroContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       gsap.registerPlugin(ScrollTrigger);
 
-      // Hero Entrance GSAP Animation
       const ctx = gsap.context(() => {
-        gsap.from(".gsap-hero-title", {
+        // Reveal Hero content on scroll over the Spline robot canvas
+        gsap.from(".gsap-hero-content", {
+          scrollTrigger: {
+            trigger: ".gsap-hero-trigger",
+            start: "top 60%",
+            end: "top 20%",
+            scrub: 1
+          },
           opacity: 0,
-          y: 40,
-          duration: 1,
-          stagger: 0.2,
-          ease: "power3.out"
+          y: 80,
+          ease: "power2.out"
         });
 
-        gsap.from(".gsap-hero-badge", {
-          opacity: 0,
-          scale: 0.8,
-          duration: 0.8,
-          ease: "back.out(1.7)",
-          delay: 0.2
-        });
-
+        // Reveal cards on scroll
         gsap.from(".gsap-card-reveal", {
           scrollTrigger: {
             trigger: ".gsap-cards-container",
-            start: "top 80%",
+            start: "top 85%",
             toggleActions: "play none none reverse"
           },
           opacity: 0,
-          y: 30,
+          y: 40,
           stagger: 0.15,
           duration: 0.8,
           ease: "power2.out"
         });
-      }, heroRef);
+      });
 
       return () => ctx.revert();
     }
@@ -194,9 +189,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-neutral-100 selection:bg-purple-600 selection:text-white relative font-sans">
-      {/* 3D Spline Canvas Interactive Background */}
+      {/* Fixed 3D Spline Canvas Interactive Robot Background */}
       <div className="fixed inset-0 z-0 pointer-events-auto transition-all duration-500 overflow-hidden">
-        <div className="absolute inset-0 bg-black/60 z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
         <div className="absolute inset-0 flex items-center justify-center">
           {/* @ts-ignore */}
           <spline-viewer
@@ -212,7 +207,7 @@ export default function Home() {
       <div className="fixed top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 z-[100]" />
 
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-white/10 transition-all duration-300">
+      <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-black/60 border-b border-white/10 transition-all duration-300">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <a href="#" className="flex items-center gap-3 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-purple-500 to-pink-500 p-[1.5px] group-hover:scale-105 transition-transform duration-300">
@@ -341,11 +336,28 @@ export default function Home() {
         </AnimatePresence>
       </header>
 
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative z-10 pt-16 pb-20 md:pt-28 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <div className="text-center md:text-left space-y-8">
+      {/* SECTION 1: Full-Screen 3D Robot Viewport with Scroll Indicator */}
+      <section className="relative h-screen w-full flex flex-col justify-between items-center z-10 pointer-events-none pt-24 pb-12 px-6">
+        <div />
+        
+        {/* Floating Scroll Indicator at bottom */}
+        <motion.a
+          href="#hero-info"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ repeat: Infinity, repeatType: "reverse", duration: 1.5 }}
+          className="pointer-events-auto flex flex-col items-center gap-2 px-5 py-2.5 rounded-full bg-black/60 border border-white/20 backdrop-blur-md text-white/80 hover:text-white transition-all shadow-xl"
+        >
+          <span className="text-xs uppercase tracking-widest font-mono text-neutral-300">SCROLL</span>
+          <ChevronDown className="w-4 h-4 text-cyan-400 animate-bounce" />
+        </motion.a>
+      </section>
+
+      {/* SECTION 2: Hero Information Revealed on Scroll */}
+      <section id="hero-info" className="gsap-hero-trigger relative z-10 pt-16 pb-20 md:pt-24 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div className="gsap-hero-content text-center md:text-left space-y-8 bg-black/60 p-8 md:p-12 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
           {/* Status Badges */}
-          <div className="gsap-hero-badge flex flex-wrap items-center justify-center md:justify-start gap-3">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md text-emerald-400 text-xs font-medium">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               Disponible pour formations, projets &amp; accompagnements
@@ -358,16 +370,16 @@ export default function Home() {
 
           {/* Main Title */}
           <div className="space-y-4 max-w-4xl">
-            <h1 className="gsap-hero-title text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-[1.1]">
               Gawssou{" "}
               <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
                 Thiam
               </span>
             </h1>
-            <p className="gsap-hero-title text-xl sm:text-2xl md:text-3xl font-medium text-neutral-200 tracking-tight">
+            <p className="text-xl sm:text-2xl md:text-3xl font-medium text-neutral-200 tracking-tight">
               Informaticien &amp; Entrepreneur Numérique
             </p>
-            <p className="gsap-hero-title text-sm sm:text-base md:text-lg text-neutral-400 font-normal leading-relaxed max-w-3xl">
+            <p className="text-sm sm:text-base md:text-lg text-neutral-400 font-normal leading-relaxed max-w-3xl">
               Fondateur de <strong className="text-white">Keur’Geek Digital</strong>. Spécialisé en{" "}
               <span className="text-cyan-300">Intelligence Artificielle</span>,{" "}
               <span className="text-purple-300">Développement Web &amp; Mobile</span> et{" "}
@@ -378,7 +390,7 @@ export default function Home() {
           </div>
 
           {/* Action Buttons */}
-          <div className="gsap-hero-title flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-2">
             <a
               href="https://wa.me/221701056707"
               target="_blank"
@@ -416,7 +428,7 @@ export default function Home() {
           </div>
 
           {/* Quick Metrics / Highlights */}
-          <div className="gsap-hero-title grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8 border-t border-white/10 max-w-4xl">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8 border-t border-white/10 max-w-4xl">
             <div className="p-4 rounded-xl bg-neutral-900/60 border border-white/5 backdrop-blur-sm">
               <div className="text-2xl font-bold text-cyan-400">Keur’Geek</div>
               <div className="text-xs text-neutral-400 mt-1">Startup Tech Fondée</div>
@@ -512,7 +524,7 @@ export default function Home() {
       </section>
 
       {/* Services & Formations Section */}
-      <section id="services" ref={servicesRef} className="relative z-10 py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="services" className="relative z-10 py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
           <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-purple-400">
             <Zap className="w-4 h-4" />
@@ -600,7 +612,7 @@ export default function Home() {
       </section>
 
       {/* Projects Showcase */}
-      <section id="projects" ref={projectsRef} className="relative z-10 py-20 bg-neutral-950/80 border-y border-white/10">
+      <section id="projects" className="relative z-10 py-20 bg-neutral-950/80 border-y border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div className="space-y-3">
@@ -710,7 +722,7 @@ export default function Home() {
       </section>
 
       {/* Compétences Section */}
-      <section id="skills" ref={skillsRef} className="relative z-10 py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="skills" className="relative z-10 py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
           <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-cyan-400">
             <Wrench className="w-4 h-4" />
