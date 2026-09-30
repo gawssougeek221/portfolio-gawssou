@@ -48,6 +48,17 @@ body {
   border: 2px solid #09090b;
 }
 
+/* ——— Perf scroll : le navigateur peut sauter le rendu des sections hors écran ——— */
+#services,
+#projects,
+#skills,
+#education,
+#contact,
+#parcours-story {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 800px;
+}
+
 /* ——— Utilitaires parallax / scrolly ——— */
 .will-change-transform {
   will-change: transform;

@@ -26,7 +26,7 @@ export function Parallax({
 
   return (
     <div ref={ref} className={cn("relative", className)}>
-      <motion.div style={{ y }} className="will-change-transform">
+      <motion.div style={{ y }} className="will-change-transform transform-gpu">
         {children}
       </motion.div>
     </div>
@@ -56,7 +56,7 @@ export function Drift({
 
   return (
     <div ref={ref} className={cn("relative overflow-hidden", className)}>
-      <motion.div style={{ x }} className="will-change-transform whitespace-nowrap">
+      <motion.div style={{ x }} className="will-change-transform transform-gpu whitespace-nowrap">
         {children}
       </motion.div>
     </div>
@@ -64,12 +64,13 @@ export function Drift({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Reveal : apparition fluide au scroll (fade + rise + blur)          */
+/*  Reveal : apparition fluide au scroll (fade + rise, sans blur       */
+/*  — le blur animé coûte cher en compositing, on l'évite)             */
 /* ------------------------------------------------------------------ */
 export function Reveal({
   children,
   delay = 0,
-  y = 36,
+  y = 28,
   className,
 }: {
   children: ReactNode;
@@ -79,11 +80,11 @@ export function Reveal({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y, filter: "blur(6px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={cn("will-change-transform", className)}
+      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
+      className={cn("transform-gpu", className)}
     >
       {children}
     </motion.div>
@@ -114,7 +115,7 @@ export function ScaleOnScroll({
 
   return (
     <div ref={ref} className={className}>
-      <motion.div style={{ scale, opacity }} className="will-change-transform">
+      <motion.div style={{ scale, opacity }} className="will-change-transform transform-gpu">
         {children}
       </motion.div>
     </div>

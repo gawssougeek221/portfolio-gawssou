@@ -62,22 +62,23 @@ export default function Home() {
   const splineWrapperRef = useRef<HTMLDivElement>(null);
   const bgOverlayRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLElement>(null);
-  const orbsRef = useRef<HTMLDivElement>(null);
 
-  // Parallax global : orbes de fond + contenu hero
+  // Parallax léger : un seul useScroll global, transforms GPU uniquement.
+  // (Pas de scale ni de blur animé sur le canvas fullscreen — trop coûteux.)
   const { scrollYProgress: pageScroll } = useScroll();
-  const orbsY = useTransform(pageScroll, [0, 1], [0, 300]);
-  const heroContentY = useTransform(pageScroll, [0, 0.25], [0, 140]);
   const heroFade = useTransform(pageScroll, [0, 0.22], [1, 0]);
-  const splineY = useTransform(pageScroll, [0, 0.4], ["0%", "18%"]);
-  const splineScale = useTransform(pageScroll, [0, 0.4], [1, 1.12]);
+  const splineY = useTransform(pageScroll, [0, 0.4], ["0%", "8%"]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       gsap.registerPlugin(ScrollTrigger);
+      // Évite les recalculs coûteux au resize mobile (barre d'URL)
+      ScrollTrigger.config({ ignoreMobileResize: true });
 
       const ctx = gsap.context(() => {
-        // Blur + assombrit le fond Spline 3D au scroll passé le hero
+        // Assombrit + estompe le fond Spline 3D au scroll passé le hero.
+        // NOTE perf : pas de `filter: blur()` animé sur le canvas fullscreen
+        // (re-blur du WebGL à chaque frame = jank). Opacité seule = cheap.
         gsap.to(splineWrapperRef.current, {
           scrollTrigger: {
             trigger: ".gsap-hero-trigger",
@@ -85,8 +86,7 @@ export default function Home() {
             end: "top 15%",
             scrub: true
           },
-          filter: "blur(12px)",
-          opacity: 0.8,
+          opacity: 0.55,
           ease: "none"
         });
 
@@ -114,68 +114,71 @@ export default function Home() {
           ease: "power2.out"
         });
 
-        // Reveal cards on scroll
+        // Reveal cards on scroll (une seule fois)
         gsap.from(".gsap-card-reveal", {
           scrollTrigger: {
             trigger: ".gsap-cards-container",
             start: "top 85%",
-            toggleActions: "play none none reverse"
+            toggleActions: "play none none none"
           },
           opacity: 0,
           y: 40,
-          stagger: 0.15,
-          duration: 0.8,
-          ease: "power2.out"
+          stagger: 0.12,
+          duration: 0.7,
+          ease: "power2.out",
+          overwrite: "auto"
         });
 
         // ——— NOUVEAU : parallax générique ———
         // Tout élément [data-parallax="0.2"] bouge à 20% de la vitesse du scroll
+        // scrub: true (sans inertie) = suivi direct, moins de sensation de lag.
         gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((el) => {
           const speed = parseFloat(el.dataset.parallax || "0.15");
           gsap.to(el, {
             yPercent: speed * 100,
             ease: "none",
+            overwrite: "auto",
             scrollTrigger: {
               trigger: el.closest("section") || el,
               start: "top bottom",
               end: "bottom top",
-              scrub: 1.2
+              scrub: true
             }
           });
         });
 
         // ——— NOUVEAU : reveal générique [data-reveal] ———
+        // Joué une seule fois (pas de reverse) pour limiter le travail au scroll.
         gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((el) => {
           gsap.from(el, {
             opacity: 0,
-            y: 48,
-            duration: 0.9,
-            ease: "power3.out",
+            y: 40,
+            duration: 0.7,
+            ease: "power2.out",
+            overwrite: "auto",
             scrollTrigger: {
               trigger: el,
               start: "top 88%",
-              toggleActions: "play none none reverse"
+              toggleActions: "play none none none"
             }
           });
         });
 
         // ——— NOUVEAU : zoom scrollytelling sur les visuels [data-zoom] ———
+        // Joué une seule fois aussi : le scrub permanent sur scale = repaint continu.
         gsap.utils.toArray<HTMLElement>("[data-zoom]").forEach((el) => {
-          gsap.fromTo(
-            el,
-            { scale: 0.92, opacity: 0.5 },
-            {
-              scale: 1,
-              opacity: 1,
-              ease: "none",
-              scrollTrigger: {
-                trigger: el,
-                start: "top 95%",
-                end: "center 55%",
-                scrub: 1
-              }
+          gsap.from(el, {
+            scale: 0.94,
+            opacity: 0.6,
+            duration: 0.8,
+            ease: "power2.out",
+            overwrite: "auto",
+            scrollTrigger: {
+              trigger: el,
+              start: "top 92%",
+              toggleActions: "play none none none"
             }
-          );
+          });
         });
 
         // ——— NOUVEAU : ligne de timeline éducation qui se remplit au scroll ———
@@ -298,32 +301,22 @@ export default function Home() {
       {/* Barre de progression du scroll (scrollytelling) */}
       <ScrollProgress />
 
-      {/* Orbes parallax globaux — profondeur derrière tout le contenu */}
-      <motion.div
-        ref={orbsRef}
-        style={{ y: orbsY }}
+      {/* Orbes de fond statiques — pas d'animation au scroll (perf).
+          Un calque fixed animé à chaque frame = repaint permanent. */}
+      <div
         aria-hidden
-        className="fixed inset-0 z-[1] pointer-events-none overflow-hidden"
+        className="fixed inset-0 z-[1] pointer-events-none overflow-hidden hidden md:block"
       >
-        <div
-          data-parallax="0.25"
-          className="absolute top-[15%] -left-32 w-[480px] h-[480px] rounded-full bg-cyan-500/10 blur-[120px]"
-        />
-        <div
-          data-parallax="-0.2"
-          className="absolute top-[45%] -right-32 w-[520px] h-[520px] rounded-full bg-purple-500/10 blur-[130px]"
-        />
-        <div
-          data-parallax="0.35"
-          className="absolute bottom-[5%] left-1/3 w-[420px] h-[420px] rounded-full bg-pink-500/[0.07] blur-[120px]"
-        />
-      </motion.div>
+        <div className="absolute top-[15%] -left-32 w-[420px] h-[420px] rounded-full bg-cyan-500/10 blur-[100px]" />
+        <div className="absolute top-[45%] -right-32 w-[440px] h-[440px] rounded-full bg-purple-500/10 blur-[100px]" />
+        <div className="absolute bottom-[5%] left-1/3 w-[380px] h-[380px] rounded-full bg-pink-500/[0.07] blur-[100px]" />
+      </div>
 
-      {/* Fixed 3D Spline Canvas Interactive Robot Background — avec parallax */}
+      {/* Fixed 3D Spline Canvas Interactive Robot Background — parallax léger (y seul) */}
       <motion.div
         ref={splineWrapperRef}
-        style={{ y: splineY, scale: splineScale, filter: "blur(0px)" }}
-        className="fixed inset-0 z-0 pointer-events-auto transition-all duration-500 overflow-hidden will-change-transform"
+        style={{ y: splineY }}
+        className="fixed inset-0 z-0 pointer-events-auto overflow-hidden transform-gpu"
       >
         <div
           ref={bgOverlayRef}
@@ -476,16 +469,6 @@ export default function Home() {
         style={{ opacity: heroFade }}
         className="relative h-screen w-full flex flex-col justify-between items-center z-10 pointer-events-none pt-24 pb-12 px-6"
       >
-        {/* Titre fantôme parallax derrière le robot */}
-        <div
-          data-parallax="0.3"
-          aria-hidden
-          className="absolute inset-0 flex items-center justify-center select-none pointer-events-none"
-        >
-          <span className="font-black uppercase tracking-tight text-[18vw] leading-none text-white/[0.04]">
-            Gawssou
-          </span>
-        </div>
         <div />
 
         {/* Floating Scroll Indicator at bottom */}
@@ -501,9 +484,9 @@ export default function Home() {
         </motion.a>
       </motion.section>
 
-      {/* SECTION 2: Hero Information Revealed on Scroll — avec parallax au scroll */}
+      {/* SECTION 2: Hero Information Revealed on Scroll (animé par GSAP seul —
+          pas de double animation framer-motion sur le même élément) */}
       <section id="hero-info" className="gsap-hero-trigger relative z-10 pt-16 pb-20 md:pt-24 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <motion.div style={{ y: heroContentY }}>
         <div data-zoom className="gsap-hero-content text-center md:text-left space-y-8 bg-black/60 p-8 md:p-12 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
           {/* Status Badges */}
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
@@ -611,7 +594,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-        </motion.div>
       </section>
 
       {/* Profil Professionnel & Vision Section — titres avec drift parallax */}
